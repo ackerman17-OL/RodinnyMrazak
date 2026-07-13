@@ -358,12 +358,30 @@ html+=`
 m.supliky.forEach((suplik,index)=>{
 
 
-let nazevSupliku="Šuplík "+(index+1);
+let nazevSupliku="";
 
 
-if(m.nazev==="Žloukovice" && index===3){
+if(index===0){
 
-nazevSupliku="Malý";
+    nazevSupliku="Šuplík 1 (horní)";
+
+}
+
+if(index===1){
+
+    nazevSupliku="Šuplík 2 (prostřední)";
+
+}
+
+if(index===2){
+
+    nazevSupliku="Šuplík 3 (spodní)";
+
+}
+
+if(index===3){
+
+    nazevSupliku="Šuplík 4 (malý)";
 
 }
 
