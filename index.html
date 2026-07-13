@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Rodinný mrazák</title>
+
+<style>
+
+body {
+    font-family: Arial, sans-serif;
+    background:#f2f6fb;
+    margin:0;
+    padding:15px;
+}
+
+h1 {
+    text-align:center;
+}
+
+button {
+    border:0;
+    border-radius:10px;
+    padding:10px;
+    cursor:pointer;
+}
+
+.mrazaky {
+    display:flex;
+    gap:8px;
+}
+
+.mrazak-btn {
+    flex:1;
+    background:white;
+    box-shadow:0 2px 8px #ccc;
+    font-size:13px;
+}
+
+.active {
+    background:#2d7ff9;
+    color:white;
+}
+
+
+.karta {
+    background:white;
+    border-radius:12px;
+    padding:15px;
+    margin-top:15px;
+    box-shadow:0 2px 8px #ddd;
+}
+
+
+.suplik {
+
+    margin-top:12px;
+    background:#eaf2ff;
+    padding:12px;
+    border-radius:10px;
+    font-size:18px;
+    font-weight:bold;
+    cursor:pointer;
+
+}
+
+
+/* obsah jednoho supliku */
+
+.obsah-suplik {
+
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin-top:8px;
+    margin-bottom:10px;
+
+}
+
+
+.polozka {
+
+    width:80px;
+    min-height:50px;
+    background:#f5f5f5;
+    border-radius:8px;
+    padding:6px;
+    font-size:12px;
+    overflow:hidden;
+
+}
+
+
+.polozka b {
+
+    display:block;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    font-size:12px;
+
+}
+
+
+.smazat {
+
+    background:#ef4444;
+    color:white;
+    font-size:10px;
+    padding:4px;
+    margin-top:5px;
+
+}
+
+
+.plus {
+
+    width:100%;
+    margin-top:20px;
+    background:#22c55e;
+    color:white;
+    font-size:18px;
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<h1>❄️ Rodinný mrazák</h1>
+
+
+<div class="mrazaky">
+
+<button class="mrazak-btn active" onclick="vyberMrazak(0)">
+🏠 Domov
+</button>
+
+<button class="mrazak-btn" onclick="vyberMrazak(1)">
+🏡 Žloukovice - kůlna
+</button>
+
+<button class="mrazak-btn" onclick="vyberMrazak(2)">
+🏡 Žloukovice - chalupa
+</button>
+
+</div>
+
+
+<div id="obsah"></div>
+
+
+<button class="plus" onclick="pridat()">
+➕ Přidat položku
+</button>
+
+
+
+<script>
+
+
+let data = JSON.parse(localStorage.getItem("mrazak")) || [
+
+{
+nazev:"Domov",
+supliky:[[],[],[]]
+},
+
+{
+nazev:"Žloukovice - kůlna",
+supliky:[[],[],[]]
+},
+
+{
+nazev:"Žloukovice - chalupa",
+supliky:[[],[],[]]
+}
+
+];
+
+
+let aktualni = 0;
+
+let otevreneSupliky = [false,false,false];
+
+
+
+function uloz(){
+
+localStorage.setItem(
+"mrazak",
+JSON.stringify(data)
+);
+
+}
+
+
+
+function vyberMrazak(id){
+
+aktualni=id;
+
+otevreneSupliky=[false,false,false];
+
+
+document.querySelectorAll(".mrazak-btn")
+.forEach((x,i)=>{
+
+x.classList.toggle(
+"active",
+i===id
+);
+
+});
+
+
+vykresli();
+
+}
+
+
+
+
+function vykresli(){
+
+
+let m=data[aktualni];
+
+let html="";
+
+
+html+=`
+
+<div class="karta">
+
+<h2>${m.nazev}</h2>
+
+`;
+
+
+
+m.supliky.forEach((suplik,index)=>{
+
+
+html+=`
+
+<div class="suplik"
+onclick="prepniSuplik(${index})">
+
+${otevreneSupliky[index] ? "▼" : "▶"}
+📦 Šuplík ${index+1}
+
+</div>
+
+`;
+
+
+
+if(otevreneSupliky[index]){
+
+
+html+=`
+
+<div class="obsah-suplik">
+
+`;
+
+
+
+if(suplik.length===0){
+
+
+html+=`
+
+<div class="polozka">
+Prázdný
+</div>
+
+`;
+
+}
+
+
+suplik.forEach((p,i)=>{
+
+
+html+=`
+
+<div class="polozka">
+
+<b>${p.nazev}</b>
+
+${p.baleni}
+
+<br>
+
+${p.pocet} ks
+
+
+<button class="smazat"
+onclick="smaz(${index},${i})">
+
+X
+
+</button>
+
+
+</div>
+
+`;
+
+});
+
+
+html+=`
+
+</div>
+
+`;
+
+}
+
+
+});
+
+
+html+=`
+
+</div>
+
+`;
+
+
+
+document.getElementById("obsah").innerHTML=html;
+
+
+}
+
+
+
+
+function prepniSuplik(index){
+
+otevreneSupliky[index]=
+!otevreneSupliky[index];
+
+vykresli();
+
+}
+
+
+
+
+
+function pridat(){
+
+
+let suplik=prompt(
+"Číslo šuplíku 1-3"
+);
+
+
+suplik=parseInt(suplik)-1;
+
+
+if(suplik<0 || suplik>2){
+
+alert("Zadej 1 až 3");
+
+return;
+
+}
+
+
+
+let nazev=prompt(
+"Název"
+);
+
+
+if(!nazev)return;
+
+
+
+let baleni=prompt(
+"Balení / váha"
+);
+
+
+
+let pocet=prompt(
+"Počet kusů"
+);
+
+
+
+data[aktualni]
+.supliky[suplik]
+.push({
+
+nazev:nazev,
+
+baleni:baleni || "",
+
+pocet:pocet || 1
+
+});
+
+
+
+uloz();
+
+vykresli();
+
+
+}
+
+
+
+
+function smaz(s,i){
+
+
+data[aktualni]
+.supliky[s]
+.splice(i,1);
+
+
+uloz();
+
+vykresli();
+
+
+}
+
+
+
+vykresli();
+
+
+</script>
+
+
+</body>
+</html>
